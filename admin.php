@@ -10,7 +10,7 @@
   body {
     font-family: 'Kanit', sans-serif;
     background: #f5f7fa;
-    color: #333;
+    color: #d80606ff;
   }
   .container {
     max-width: 1400px;
