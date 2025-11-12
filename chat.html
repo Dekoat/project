@@ -5,435 +5,26 @@
 <title>Chatbot - คณะวิศวกรรมศาสตร์</title>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --primary: #a90d2c;
-    --secondary: #8b0823;
-    --bg: #ffffff;
-    --card: #f8f9fa;
-    --text: #333333;
-    --text-light: #666666;
-    --border: #dee2e6;
-    --input-bg: #ffffff;
-    --hover: #f8f9fa;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Kanit', sans-serif;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    color: var(--text);
-    line-height: 1.5;
-  }
-
-  .panel {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .head {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: #fff;
-    padding: 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .head::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent);
-    pointer-events: none;
-  }
-
-  .head .logo-container {
-    margin-bottom: 16px;
-  }
-
-  .head .logo-link {
-    display: inline-block;
-    text-decoration: none;
-    transition: all 0.3s ease;
-  }
-
-  .head .logo-link:hover {
-    transform: scale(1.05);
-  }
-
-  .head .logo-link:hover .logo {
-    filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
-  }
-
-  .head .logo {
-    width: auto;
-    height: 65px;
-    /* ลบ filter ออกเพื่อให้แสดงสีจริงของโลโก้ */
-    transition: all 0.3s ease;
-    display: block;
-    margin: 0 auto;
-  }
-  
-  .head .logo:hover {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
-  }
-
-  .head .text-container {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  .head .title {
-    font-size: 1.6em;
-    font-weight: 600;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-  }
-
-  .head .subtitle {
-    font-size: 1.1em;
-    color: rgba(255,255,255,0.9);
-    font-weight: 300;
-    letter-spacing: 0.3px;
-  }
-
-  .body {
-    flex: 1;
-    height: auto;
-    overflow-y: auto;
-    padding: 24px;
-    background: #fbfdff;
-    position: absolute;
-    top: 180px; /* ความสูงของส่วน header */
-    bottom: 100px; /* ความสูงของ footer */
-    left: 0;
-    right: 0;
-  }
-
-  .msg {
-    max-width: 85%;
-    margin: 16px 0;
-    display: block;
-    font-size: 1.05em;
-    line-height: 1.5;
-    animation: fadeIn 0.3s ease;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .msg.user {
-    margin-left: auto;
-    margin-right: 0;
-    text-align: right;
-    color: #fff;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    padding: 12px 18px;
-    border-radius: 16px 16px 4px 16px;
-    width: fit-content;
-    float: right;
-    clear: both;
-  }
-
-  .msg.bot {
-    margin-right: auto;
-    margin-left: 0;
-    text-align: left;
-    color: var(--text);
-    padding: 0;
-    border-radius: 16px 16px 16px 4px;
-    background: transparent;
-    width: fit-content;
-    float: left;
-    clear: both;
-  }
-
-  .bot-container {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .bot-icon {
-    width: 35px;
-    height: 35px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  .bot-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-  }
-
-  .bot-icon:hover img {
-    transform: scale(1.1);
-  }
-
-  .bot-content {
-    background: #fff;
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    padding: 12px 18px;
-    border-radius: 16px 16px 16px 4px;
-  }
-
-  .meta {
-    font-size: 0.8em;
-    color: white;
-    margin-top: 6px;
-    opacity: 0.8;
-  }
-
-  .card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-top: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    transition: all 0.2s ease;
-  }
-
-  .card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transform: translateY(-1px);
-  }
-
-  .card a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 500;
-    display: inline-block;
-    margin-top: 8px;
-    transition: color 0.2s ease;
-  }
-
-  .card a:hover {
-    color: var(--secondary);
-    text-decoration: underline;
-  }
-
-  .footer {
-    display: flex;
-    padding: 16px 24px;
-    border-top: 1px solid var(--border);
-    background: var(--card);
-    gap: 12px;
-  }
-
-  input[type=text] {
-    flex: 1;
-    padding: 12px 18px;
-    border-radius: 12px;
-    border: 2px solid var(--border);
-    font-size: 1em;
-    font-family: 'Kanit', sans-serif;
-    transition: all 0.2s ease;
-  }
-
-  input[type=text]:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(122,31,92,0.1);
-  }
-
-  button {
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 1em;
-    font-family: 'Kanit', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  button:hover {
-    background: var(--secondary);
-    transform: translateY(-1px);
-  }
-
-  button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
-  .small {
-    font-size: 0.9em;
-    color: var(--text-light);
-  }
-
-  /* Custom Scrollbar */
-  .body::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .body::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .body::-webkit-scrollbar-thumb {
-    background: #ddd;
-    border-radius: 4px;
-  }
-
-  .body::-webkit-scrollbar-thumb:hover {
-    background: #ccc;
-  }
-
-  .messages-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-    padding-bottom: 20px;
-  }
-
-  .body {
-    flex: 1;
-    overflow-y: auto;
-    background: var(--bg);
-    padding-bottom: 20px;
-    scroll-behavior: smooth;
-  }
-
-  .input-wrapper {
-    flex: 1;
-    position: relative;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-
-  .chat-input-container {
-    display: flex;
-    align-items: center;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 10px 16px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    transition: all 0.2s ease;
-  }
-
-  .chat-input-container:focus-within {
-    border-color: var(--primary);
-    box-shadow: 0 4px 20px rgba(169,13,44,0.15);
-  }
-
-  input[type=text] {
-    width: 100%;
-    padding: 12px 18px;
-    border: none;
-    font-size: 1.05em;
-    font-family: 'Kanit', sans-serif;
-    background: transparent;
-    color: var(--text);
-    transition: all 0.2s ease;
-  }
-
-  input[type=text]:focus {
-    outline: none;
-  }
-
-  input[type=text]:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(169,13,44,0.1);
-  }
-
-  button {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 1em;
-    font-family: 'Kanit', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    margin-left: 8px;
-  }
-
-  button:hover {
-    background: var(--secondary);
-    transform: translateY(-1px);
-  }
-
-  .footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 24px 40px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-    box-sizing: border-box;
-  }
-
-  .footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .messages-container {
-      padding: 15px;
-      padding-bottom: 90px;
-    }
-    .head { padding: 15px; }
-    .head .logo { height: 40px; }
-    .head .title { font-size: 1.2em; }
-    .footer { padding: 15px; }
-    input[type=text] { padding: 12px 16px; font-size: 0.95em; }
-    button { padding: 12px 20px; font-size: 0.95em; }
-  }
-</style>
+<link rel="stylesheet" href="chat.css">
 </head>
 <body>
   <div class="panel" role="application" aria-label="Chatbot">
     <div class="head">
-      <div class="logo-container">
-        <a href="https://eng.rmutp.ac.th/" target="_blank" class="logo-link">
-          <img src="rmutp-logo.png" alt="RMUTP Engineering Logo" class="logo">
-        </a>
-        <div class="text-container">
-          <div class="title">แชทบอท คณะวิศวกรรมศาสตร์</div>
-          <div class="subtitle">มหาวิทยาลัยเทคโนโลยีราชมงคลพระนคร</div>
+      <div class="head-left">
+        <div class="logo-container">
+          <a href="https://eng.rmutp.ac.th/" target="_blank" class="logo-link" rel="noopener">
+            <img src="rmutp-logo.png" alt="RMUTP Engineering Logo" class="logo">
+          </a>
+          <div class="text-container">
+            <div class="title">แชทบอท คณะวิศวกรรมศาสตร์</div>
+            <div class="subtitle">มหาวิทยาลัยเทคโนโลยีราชมงคลพระนคร</div>
+          </div>
         </div>
       </div>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="เปิดโหมดมืด">
+        <span class="theme-icon">🌙</span>
+        <span class="theme-label">โหมดมืด</span>
+      </button>
     </div>
 
     <div class="body" id="chatlog" aria-live="polite">
@@ -462,6 +53,53 @@
 <script>
 const chatlog = document.getElementById('chatlog');
 const messagesContainer = chatlog.querySelector('.messages-container');
+const themeToggleButton = document.getElementById('themeToggle');
+const themeStorageKey = 'eng-chatbot-theme';
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+function updateThemeToggle(mode) {
+  if (!themeToggleButton) return;
+  const iconEl = themeToggleButton.querySelector('.theme-icon');
+  const labelEl = themeToggleButton.querySelector('.theme-label');
+  if (mode === 'dark') {
+    if (iconEl) iconEl.textContent = '☀️';
+    if (labelEl) labelEl.textContent = 'โหมดสว่าง';
+    themeToggleButton.setAttribute('aria-label', 'ปิดโหมดมืด');
+  } else {
+    if (iconEl) iconEl.textContent = '🌙';
+    if (labelEl) labelEl.textContent = 'โหมดมืด';
+    themeToggleButton.setAttribute('aria-label', 'เปิดโหมดมืด');
+  }
+}
+
+function applyTheme(mode) {
+  const enableDark = mode === 'dark';
+  document.body.classList.toggle('dark-theme', enableDark);
+  updateThemeToggle(enableDark ? 'dark' : 'light');
+}
+
+const storedTheme = localStorage.getItem(themeStorageKey);
+const initialTheme = storedTheme || (prefersDark.matches ? 'dark' : 'light');
+applyTheme(initialTheme);
+
+if (themeToggleButton) {
+  themeToggleButton.addEventListener('click', () => {
+    const next = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(themeStorageKey, next);
+  });
+}
+
+const handlePrefersChange = event => {
+  if (localStorage.getItem(themeStorageKey)) return;
+  applyTheme(event.matches ? 'dark' : 'light');
+};
+
+if (typeof prefersDark.addEventListener === 'function') {
+  prefersDark.addEventListener('change', handlePrefersChange);
+} else if (typeof prefersDark.addListener === 'function') {
+  prefersDark.addListener(handlePrefersChange);
+}
 
 // Quick reply suggestions
 function showQuickReplies() {
@@ -479,9 +117,17 @@ function showQuickReplies() {
   suggestions.forEach(text => {
     const btn = document.createElement('button');
     btn.textContent = text;
-    btn.style.cssText = 'background:#f0f0f0; border:1px solid #ddd; padding:8px 16px; border-radius:20px; cursor:pointer; font-family:Kanit; font-size:0.9em; transition:all 0.2s;';
-    btn.onmouseover = () => btn.style.background = '#e0e0e0';
-    btn.onmouseout = () => btn.style.background = '#f0f0f0';
+    btn.style.cssText = 'background:#a90d2c; color:white; border:none; padding:10px 18px; border-radius:20px; cursor:pointer; font-family:Kanit; font-size:0.95em; font-weight:500; transition:all 0.3s; box-shadow:0 2px 6px rgba(169,13,44,0.3);';
+    btn.onmouseover = () => {
+      btn.style.background = '#8b0823';
+      btn.style.transform = 'translateY(-2px)';
+      btn.style.boxShadow = '0 4px 12px rgba(169,13,44,0.4)';
+    };
+    btn.onmouseout = () => {
+      btn.style.background = '#a90d2c';
+      btn.style.transform = 'translateY(0)';
+      btn.style.boxShadow = '0 2px 6px rgba(169,13,44,0.3)';
+    };
     btn.onclick = () => {
       document.getElementById('userInput').value = text;
       sendMessage();
@@ -563,7 +209,14 @@ function appendBot(text){
   // สร้าง content container
   const contentContainer = document.createElement('div');
   contentContainer.className = 'bot-content';
-  contentContainer.innerHTML = escapeHtml(text) + `<div class="meta">${timeNow()}</div>`;
+  
+  // แปลง \n เป็น <br> และแปลง emoji ให้แสดงผลสวย
+  const formattedText = text
+    .split('\n')
+    .map(line => escapeHtml(line))
+    .join('<br>');
+  
+  contentContainer.innerHTML = formattedText + `<div class="meta">${timeNow()}</div>`;
   
   botContainer.appendChild(botIcon);
   botContainer.appendChild(contentContainer);
@@ -574,31 +227,136 @@ function appendBot(text){
   scrollBottom();
 }
 
+function cleanSummary(text){
+  return String(text || '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function truncateText(text, maxLength){
+  if(!text) return '';
+  if(text.length <= maxLength) return text;
+  const sliced = text.slice(0, maxLength);
+  return sliced.replace(/\s+\S*$/, '').trim() + '…';
+}
+
+function normalizeNewsLabel(label){
+  const key = String(label || '').trim();
+  const map = {
+    'กิจกรรมคณะวิศวกรรมศาสตร์': 'กิจกรรมคณะวิศวกรรมศาสตร์',
+    'กิจจกรรมคณะวิศวกรรมศาสตร์': 'กิจกรรมคณะวิศวกรรมศาสตร์',
+    'ข่าวประชาสัมพันธ์': 'ข่าวประชาสัมพันธ์',
+    'ข่าว': 'ข่าวประชาสัมพันธ์',
+    'ข่าวที่เพิ่มเอง': 'ข่าวที่เพิ่มเอง'
+  };
+  return map[key] || key;
+}
+
+function formatNewsCategory(source){
+  if(!source) return 'ข่าวประชาสัมพันธ์';
+  const parts = String(source).split(':');
+  const label = normalizeNewsLabel(parts.slice(1).join(':'));
+  if(label) return label;
+
+  const baseRaw = String(parts[0] || '').trim();
+  if(baseRaw === 'scraped') return 'ข่าวประชาสัมพันธ์';
+  if(baseRaw === 'manual') return 'ข่าวที่เพิ่มเอง';
+  return normalizeNewsLabel(baseRaw) || 'ข่าวประชาสัมพันธ์';
+}
+
+function newsCategoryLink(label){
+  const normalized = normalizeNewsLabel(label);
+  const map = {
+    'ข่าวประชาสัมพันธ์': 'https://eng.rmutp.ac.th/category/public-relations/',
+    'กิจกรรมคณะวิศวกรรมศาสตร์': 'https://eng.rmutp.ac.th/category/faculty-activities/'
+  };
+  return map[normalized] || 'https://eng.rmutp.ac.th/';
+}
+
 function appendNews(items){
   hideTyping();
   const wrapper = document.createElement('div');
   wrapper.style.clear = 'both';
   wrapper.style.overflow = 'hidden';
   wrapper.style.width = '100%';
-  
-  // Add header
-  const header = document.createElement('div');
-  header.style.cssText = 'margin:10px 0; color:#666; font-size:0.95em;';
-  header.innerHTML = `📰 พบข่าวประชาสัมพันธ์ ${items.length} รายการ`;
-  wrapper.appendChild(header);
-  
-  items.forEach(n => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div style="font-weight:700; color:#a90d2c;">${escapeHtml(n.title)}</div>
-      <div class="small" style="color:#666; margin:5px 0;">📅 ${escapeHtml(n.date_post)}</div>
-      <p style="margin:10px 0;">${escapeHtml(n.summary||'')}</p>
-      <a href="${n.url}" target="_blank">📖 อ่านเพิ่มเติม →</a>
+
+  const message = document.createElement('div');
+  message.className = 'msg bot';
+
+  const botContainer = document.createElement('div');
+  botContainer.className = 'bot-container';
+
+  const botIcon = document.createElement('div');
+  botIcon.className = 'bot-icon';
+  botIcon.innerHTML = `<img src="rmutp-logo1.png" alt="RMUTP Bot Icon">`;
+
+  const contentContainer = document.createElement('div');
+  contentContainer.className = 'bot-content news-bot-content';
+
+  const topItems = items.slice(0, 4);
+
+  if(topItems.length === 0) {
+    contentContainer.innerHTML = `
+      <div class="news-response">
+        <p class="news-summary">ตอนนี้ยังไม่มีข่าวอัปเดตจากเว็บไซต์คณะครับ</p>
+      </div>
+      <div class="meta">${timeNow()}</div>
     `;
-    wrapper.appendChild(card);
-  });
-  
+  } else {
+    const categories = Array.from(new Set(topItems.map(item => formatNewsCategory(item.source)))).filter(Boolean);
+    const headerLabel = categories.length === 1 ? categories[0] : 'ข่าวล่าสุด';
+    const chipsHtml = categories.map(cat => `<span class="news-chip">${escapeHtml(cat)}</span>`).join('');
+  const moreUrl = categories.length === 1 ? newsCategoryLink(categories[0]) : 'https://eng.rmutp.ac.th/';
+  const extraCount = Math.max(items.length - topItems.length, 0);
+  const footerNote = extraCount > 0 ? `<span class="news-footer-note">มีอีก ${extraCount} ข่าวบนเว็บไซต์</span>` : '';
+
+    let newsHTML = '';
+    topItems.forEach((item, index) => {
+      const categoryLabel = formatNewsCategory(item.source);
+      const summaryText = truncateText(cleanSummary(item.summary || ''), 150);
+      newsHTML += `
+        <article class="news-card">
+          <div class="news-index">${String(index + 1).padStart(2, '0')}</div>
+          <div class="news-details">
+            <h4 class="news-item-title">${escapeHtml(item.title)}</h4>
+            <div class="news-meta">
+              <span class="news-date">📅 ${escapeHtml(item.date_post)}</span>
+              ${categoryLabel ? `<span class="news-category">${escapeHtml(categoryLabel)}</span>` : ''}
+            </div>
+            ${summaryText ? `<p class="news-summary">${escapeHtml(summaryText)}</p>` : ''}
+            <a class="news-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">อ่านข่าวเต็ม</a>
+          </div>
+        </article>
+      `;
+    });
+
+    contentContainer.innerHTML = `
+      <div class="news-response">
+        <div class="news-header">
+          <div class="news-header-left">
+            <div class="news-header-icon">📰</div>
+            <div>
+              <div class="news-header-title">${escapeHtml(headerLabel)}</div>
+              <div class="news-header-subtitle">คัดมา ${topItems.length} ข่าวล่าสุดจากเว็บไซต์คณะ</div>
+            </div>
+          </div>
+          ${chipsHtml ? `<div class="news-chip-wrapper">${chipsHtml}</div>` : ''}
+        </div>
+        <div class="news-grid">${newsHTML}</div>
+        <div class="news-footer">
+          ${footerNote}
+          <a class="news-more" href="${escapeHtml(moreUrl)}" target="_blank" rel="noopener">ดูข่าวทั้งหมด →</a>
+        </div>
+      </div>
+      <div class="meta">${timeNow()}</div>
+    `;
+  }
+
+  botContainer.appendChild(botIcon);
+  botContainer.appendChild(contentContainer);
+  message.appendChild(botContainer);
+  wrapper.appendChild(message);
   messagesContainer.appendChild(wrapper);
   scrollBottom();
 }
