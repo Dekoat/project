@@ -136,6 +136,20 @@ switch($action) {
         }
         $stmt->close();
         break;
+
+    case 'update_staff':
+        $id = intval($_GET['id'] ?? 0);
+        $data = json_decode(file_get_contents('php://input'), true);
+        $stmt = $conn->prepare("UPDATE staff SET fullname=?, title=?, department=?, role=?, email=?, phone=? WHERE id=?");
+        $stmt->bind_param("ssssssi", $data['fullname'], $data['title'], $data['department'], $data['role'], $data['email'], $data['phone'], $id);
+        if($stmt->execute()) {
+            $response['success'] = true;
+            $response['message'] = 'อัปเดตข้อมูลบุคลากรสำเร็จ';
+        } else {
+            $response['message'] = 'เกิดข้อผิดพลาด: ' . $conn->error;
+        }
+        $stmt->close();
+        break;
     
     case 'delete_staff':
         $id = intval($_GET['id']);
