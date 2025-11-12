@@ -10,7 +10,7 @@
   body {
     font-family: 'Kanit', sans-serif;
     background: #f5f7fa;
-    color: #d80606ff;
+    color: #333;
   }
   .container {
     max-width: 1400px;
@@ -394,8 +394,10 @@
     <h2>🔄 Web Scraper - อัปเดตข้อมูลอัตโนมัติ</h2>
     <p style="color:#666; margin-bottom:20px;">ดึงข้อมูลข่าวและบุคลากรจากเว็บไซต์คณะวิศวกรรมศาสตร์</p>
     
-    <div style="display:flex; gap:15px; margin-bottom:30px;">
-      <button class="btn btn-success" onclick="runScraper('news')">🔄 ดึงข่าว</button>
+    <div style="display:flex; gap:15px; margin-bottom:30px; flex-wrap:wrap;">
+      <button class="btn btn-success" onclick="runScraper('news', { category: 'pr' })">🔄 ดึงข่าวประชาสัมพันธ์</button>
+      <button class="btn btn-success" onclick="runScraper('news', { category: 'activities' })">🔄 ดึงข่าวกิจกรรม</button>
+      <button class="btn" onclick="runScraper('news')">🔄 ดึงข่าวทั้งหมด</button>
       <button class="btn btn-success" onclick="runScraper('staff')">🔄 ดึงบุคลากร</button>
       <button class="btn" onclick="runScraper('all')">🔄 ดึงทั้งหมด</button>
     </div>
@@ -452,6 +454,8 @@ function loadDashboard() {
 
 // FAQ Management
 let currentFAQId = null;
+let currentStaffId = null;
+let staffCache = [];
 function showAddFAQ() {
   document.getElementById('faqForm').style.display = 'block';
   currentFAQId = null;
@@ -513,8 +517,28 @@ function loadFAQs() {
 // Similar functions for News and Staff...
 function showAddNews() { document.getElementById('newsForm').style.display = 'block'; }
 function cancelNews() { document.getElementById('newsForm').style.display = 'none'; }
-function showAddStaff() { document.getElementById('staffForm').style.display = 'block'; }
-function cancelStaff() { document.getElementById('staffForm').style.display = 'none'; }
+
+function showAddStaff(staff = null) {
+  document.getElementById('staffForm').style.display = 'block';
+  currentStaffId = staff ? staff.id : null;
+  document.getElementById('staffName').value = staff ? staff.fullname : '';
+  document.getElementById('staffTitle').value = staff ? (staff.title || '') : '';
+  document.getElementById('staffDept').value = staff ? (staff.department || '') : '';
+  document.getElementById('staffRole').value = staff ? (staff.role || '') : '';
+  document.getElementById('staffEmail').value = staff ? (staff.email || '') : '';
+  document.getElementById('staffPhone').value = staff ? (staff.phone || '') : '';
+}
+
+function cancelStaff() {
+  document.getElementById('staffForm').style.display = 'none';
+  currentStaffId = null;
+  document.getElementById('staffName').value = '';
+  document.getElementById('staffTitle').value = '';
+  document.getElementById('staffDept').value = '';
+  document.getElementById('staffRole').value = '';
+  document.getElementById('staffEmail').value = '';
+  document.getElementById('staffPhone').value = '';
+}
 
 function loadNews() {
   fetch('admin_api.php?action=list_news')
@@ -541,18 +565,69 @@ function loadStaff() {
     .then(r => r.json())
     .then(data => {
       let html = '';
-      data.items.forEach(staff => {
+      staffCache = data.items || [];
+      staffCache.forEach((staff, idx) => {
         html += `<tr>
           <td>${staff.fullname}</td>
           <td>${staff.title || '-'}</td>
           <td>${staff.department || '-'}</td>
           <td>${staff.email || '-'}</td>
           <td>
+            <button class="btn btn-sm" onclick="editStaff(${idx})">แก้ไข</button>
             <button class="btn btn-sm btn-danger" onclick="deleteStaff(${staff.id})">ลบ</button>
           </td>
         </tr>`;
       });
       document.querySelector('#staffTable tbody').innerHTML = html;
+    });
+}
+
+function editStaff(index) {
+  const staff = staffCache[index];
+  if(staff) {
+    showAddStaff(staff);
+  }
+}
+
+function saveStaff() {
+  const data = {
+    fullname: document.getElementById('staffName').value.trim(),
+    title: document.getElementById('staffTitle').value.trim(),
+    department: document.getElementById('staffDept').value.trim(),
+    role: document.getElementById('staffRole').value.trim(),
+    email: document.getElementById('staffEmail').value.trim(),
+    phone: document.getElementById('staffPhone').value.trim()
+  };
+
+  if(!data.fullname) {
+    showAlert('alertStaff', 'error', 'กรุณากรอกชื่อ-นามสกุล');
+    return;
+  }
+
+  const url = currentStaffId ? `admin_api.php?action=update_staff&id=${currentStaffId}` : 'admin_api.php?action=add_staff';
+
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  })
+  .then(r => r.json())
+  .then(result => {
+    showAlert('alertStaff', result.success ? 'success' : 'error', result.message || 'เกิดข้อผิดพลาด');
+    if(result.success) {
+      cancelStaff();
+      loadStaff();
+    }
+  });
+}
+
+function deleteStaff(id) {
+  if(!confirm('ยืนยันการลบบุคลากรนี้?')) return;
+  fetch(`admin_api.php?action=delete_staff&id=${id}`)
+    .then(r => r.json())
+    .then(result => {
+      showAlert('alertStaff', result.success ? 'success' : 'error', result.message || 'เกิดข้อผิดพลาด');
+      if(result.success) loadStaff();
     });
 }
 
@@ -574,17 +649,38 @@ function loadLogs() {
     });
 }
 
-function runScraper(type) {
+function runScraper(type, options = {}) {
   document.getElementById('scraperResult').style.display = 'block';
   document.getElementById('scraperOutput').textContent = 'กำลังดึงข้อมูล...';
   
-  fetch(`scraper.php?action=${type}`)
-    .then(r => r.json())
-    .then(data => {
-      document.getElementById('scraperOutput').textContent = JSON.stringify(data, null, 2);
-      if(data.success) {
-        alert('✅ ดึงข้อมูลสำเร็จ!');
+  const params = new URLSearchParams({ action: type });
+  if(options.category) {
+    params.append('category', options.category);
+  }
+
+  fetch(`scraper.php?${params.toString()}`)
+    .then(async response => {
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        throw new Error(text || 'ไม่สามารถอ่านผลลัพธ์ได้');
       }
+      if(!response.ok || !data.success) {
+        throw new Error(data.message || 'เกิดข้อผิดพลาดขณะดึงข้อมูล');
+      }
+      return data;
+    })
+    .then(data => {
+      let display = JSON.stringify(data, null, 2);
+      if(data.data && Array.isArray(data.data.warnings) && data.data.warnings.length) {
+        display += '\n\n⚠️ คำเตือน:\n- ' + data.data.warnings.join('\n- ');
+      }
+      document.getElementById('scraperOutput').textContent = display + '\n\n✅ ' + (data.message || 'ดึงข้อมูลสำเร็จ');
+    })
+    .catch(err => {
+      document.getElementById('scraperOutput').textContent = `❌ Error: ${err.message}`;
     });
 }
 
