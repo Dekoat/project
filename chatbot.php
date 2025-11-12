@@ -9,11 +9,11 @@
  * - Hybrid response with direct links
  */
 
+// Start session FIRST (before any output)
+session_start();
+
 include "db.php";
 header('Content-Type: application/json; charset=utf-8');
-
-// Generate or retrieve session ID
-session_start();
 if (!isset($_SESSION['chatbot_session'])) {
     $_SESSION['chatbot_session'] = uniqid('chat_', true);
 }
@@ -31,20 +31,31 @@ if($msg === '') {
 
 // Function to log chat
 function logChat($conn, $user_msg, $bot_resp, $type, $keywords, $session, $ip) {
-  $stmt = $conn->prepare("INSERT INTO chat_logs (user_message, bot_response, response_type, matched_keywords, session_id, user_ip) VALUES (?, ?, ?, ?, ?, ?)");
-  $kw = json_encode($keywords, JSON_UNESCAPED_UNICODE);
-  $resp = json_encode($bot_resp, JSON_UNESCAPED_UNICODE);
-  $stmt->bind_param("ssssss", $user_msg, $resp, $type, $kw, $session, $ip);
-  $stmt->execute();
-  $stmt->close();
+  // ปิดการบันทึก Log ชั่วคราว (ถ้ายังไม่ Import database.sql)
+  try {
+    $stmt = $conn->prepare("INSERT INTO chat_logs (user_message, bot_response, response_type, matched_keywords, session_id, user_ip) VALUES (?, ?, ?, ?, ?, ?)");
+    if($stmt) {
+      $kw = json_encode($keywords, JSON_UNESCAPED_UNICODE);
+      $resp = json_encode($bot_resp, JSON_UNESCAPED_UNICODE);
+      $stmt->bind_param("ssssss", $user_msg, $resp, $type, $kw, $session, $ip);
+      $stmt->execute();
+      $stmt->close();
+    }
+  } catch(Exception $e) {
+    // ถ้าตาราง chat_logs ยังไม่มี ก็ข้ามไป
+    error_log("Chat log error: " . $e->getMessage());
+  }
 }
 
 
 // ===== 1. NEWS INTENT =====
 if(preg_match('/(ข่าว|ประกาศ|ประชาสัมพันธ์|กิจกรรม|อีเว้นท์|event)/u', $msg, $matches)){
   $matched_keywords[] = $matches[0];
-  $sql = "SELECT id,title,summary,url, DATE_FORMAT(date_post,'%d/%m/%Y') as date_post
-          FROM news WHERE is_active=1 ORDER BY date_post DESC LIMIT 5";
+  $sql = "SELECT id,title,summary,url, DATE_FORMAT(date_post,'%d/%m/%Y') as date_post, source
+    FROM news
+    WHERE is_active=1
+    ORDER BY date_post DESC, id DESC
+    LIMIT 6";
   $res = $conn->query($sql);
   $items = [];
   while($r = $res->fetch_assoc()) $items[] = $r;
